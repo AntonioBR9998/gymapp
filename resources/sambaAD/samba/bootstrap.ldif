@@ -1,0 +1,12 @@
+dn: OU=Users,DC=gymapp,DC=es
+changetype: add
+objectClass: organizationalUnit
+ou: Users
+
+dn: CN=test_user,OU=Users,DC=gymapp,DC=es
+changetype: add
+objectClass: user
+sAMAccountName: test_user
+userPrincipalName: test_user@gmail.es
+accountExpires: 0
+userAccountControl: 512

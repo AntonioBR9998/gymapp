@@ -1,0 +1,20 @@
+FROM golang:1.25.0-trixie AS builder
+
+WORKDIR /backend
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /api ./backend
+
+FROM debian:bookworm-slim AS runtime
+
+WORKDIR /backend
+
+COPY --from=builder /api .
+
+EXPOSE 8080
+
+ENTRYPOINT ["./api", "-c", "/etc/gymapp/config_test.json"]

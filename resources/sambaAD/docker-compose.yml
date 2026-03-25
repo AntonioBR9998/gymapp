@@ -1,0 +1,35 @@
+services:
+  samba:
+    build: .
+    container_name: samba
+    hostname: ad1
+    environment:
+      DOMAIN: ${DOMAIN}
+      DOMAINNETBIOS: ${DOMAINNETBIOS}
+      ADMINPASS: ${ADMINPASS}
+    ports:
+      - "1053:53/udp"           # DNS
+      - "1088:88"               # Kerberos
+      - "1135:135"              # RPC
+      - "1137-1138:137-138/udp" # NetBIOS
+      - "1139:139"              # SMB
+      - "1389:389"              # LDAP
+      - "1445:445"              # SMB Direct
+      - "1464:464"              # Kerberos pass changes
+      - "1636:636"              # LDAPS
+      - "3268-3269:3268-3269"   # SSL
+    volumes:
+      - ./samba/bootstrap.ldif:/bootstrap/bootstrap.ldif
+      - ./samba/provision.sh:/bootstrap/provision.sh
+      - ./samba/smb.conf.template:/bootstrap/smb.conf.template
+      - samba_data:/var/lib/samba
+      - samba_tls:/var/lib/samba/private/tls
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    tmpfs:
+      - /tmp:exec,nodev,nosuid,size=1g
+volumes:
+  samba_data:
+  samba_tls:
