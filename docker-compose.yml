@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appweb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+  samba:
+    build: .
+    container_name: samba-ad
+    hostname: ad1
+    environment:
+      DOMAIN: ${DOMAIN}
+      DOMAINNETBIOS: ${DOMAINNETBIOS}
+      ADMINPASS: ${ADMINPASS}
+    ports:
+      - "1053:53/udp"           # DNS
+      - "1088:88"               # Kerberos
+      - "1135:135"              # RPC
+      - "1137-1138:137-138/udp" # NetBIOS
+      - "1139:139"              # SMB
+      - "1389:389"              # LDAP
+      - "1445:445"              # SMB Direct
+      - "1464:464"              # Kerberos pass changes
+      - "1636:636"              # LDAPS
+      - "3268-3269:3268-3269"   # SSL
+    volumes:
+      - ./resources/sambaAD/samba/bootstrap.ldif:/bootstrap/bootstrap.ldif
+      - ./resources/sambaAD/samba/provision.sh:/bootstrap/provision.sh
+      - ./resources/sambaAD/samba/smb.conf.template:/bootstrap/smb.conf.template
+      - samba_data:/var/lib/samba
+      - samba_tls:/var/lib/samba/private/tls
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    tmpfs:
+      - /tmp:exec,nodev,nosuid,size=1g
+    restart: unless-stopped
+  api:
+    build:
+      context: .
+      dockerfile: backend/dockerfile
+    container_name: api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - samba
+      - postgres
+    volumes:
+      - ./gan/config_test.json:/etc/gan/config_test.json:ro
+    restart: unless-stopped
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: appweb/dockerfile
+  #   env_file:
+  #     - appweb/.env
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - api
+volumes:
+  postgres-data:
+  samba_data:
+  samba_tls:
