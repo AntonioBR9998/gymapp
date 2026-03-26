@@ -3,7 +3,7 @@ module github.com/AntonioBR9998/gymapp
 go 1.25.0
 
 require (
-	github.com/AntonioBR9998/go-common v0.0.0-20260324212517-41effc45ff81
+	github.com/AntonioBR9998/go-common v0.1.1-0.20260326121553-48d00c32fe35
 	github.com/danielgtaylor/huma/v2 v2.37.2
 	github.com/gorilla/mux v1.8.1
 	github.com/sirupsen/logrus v1.9.4

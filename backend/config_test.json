@@ -2,7 +2,10 @@
   "api": {
     "schema": "http",
     "address": "0.0.0.0",
-    "port":8080
+    "port":8080,
+    "tlsEnabled": false,
+    "tlsCert": "",
+    "tlsKey": ""
   },
   "log": {
     "filePath": "",
