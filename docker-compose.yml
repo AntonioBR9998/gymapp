@@ -53,7 +53,7 @@ services:
       - samba
       - postgres
     volumes:
-      - ./gan/config_test.json:/etc/gan/config_test.json:ro
+      - ./backend/config_test.json:/etc/gymapp/config_test.json:ro
     restart: unless-stopped
   # frontend:
   #   build:
