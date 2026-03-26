@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	commonConfig "github.com/AntonioBR9998/go-common/config"
-	"github.com/AntonioBR9998/go-nats-simulator/gan/config"
+	"github.com/AntonioBR9998/gymapp/internal/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
