@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,7 +8,10 @@ import (
 	"syscall"
 
 	commonConfig "github.com/AntonioBR9998/go-common/config"
+	"github.com/AntonioBR9998/gymapp/api"
 	"github.com/AntonioBR9998/gymapp/internal/config"
+	"github.com/AntonioBR9998/gymapp/internal/core"
+	"github.com/AntonioBR9998/gymapp/internal/repository"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
@@ -58,22 +60,21 @@ func startGymAppService(ctx *cli.Context) error {
 		},
 	)
 
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{ServerName: cfg.ServerName, InsecureSkipVerify: true}
-
 	log.Traceln("creating repository layer")
-	// TODO
+	repository := repository.NewRepository(*cfg)
 
 	log.Traceln("creating service layer")
-	// TODO
+	service := core.NewCore(repository, *cfg)
 
 	log.Traceln("creating REST API layer")
-	// TODO
-	// s := server.NewAPI(*cfg, service)
+	s := api.NewAPI(*cfg, service)
 
-	// log.Infoln("the user server is on tap now: ", cfg.API.GetURL())
-	// return http.ListenAndServe(cfg.API.GetRelativeURL(), s.Router())
-
-	return nil // Delete this line when the function is implemented
+	log.Infoln("the user server is on tap now: ", cfg.API.GetURL())
+	if cfg.API.TLSEnabled {
+		return http.ListenAndServeTLS(cfg.API.GetRelativeURL(), cfg.API.TLSCert, cfg.API.TLSKey, s.Router())
+	} else {
+		return http.ListenAndServe(cfg.API.GetRelativeURL(), s.Router())
+	}
 }
 
 func BeforeFunc(ctx *cli.Context) error {
