@@ -9,15 +9,15 @@ until docker exec -it postgres pg_isready -U admin > /dev/null 2>&1; do
   sleep 3
 done
 
-echo "creating exercises table"
-docker exec -i postgres psql -U admin -d gymapp -c "
-CREATE TYPE exercise_type AS ENUM ('legs', 'arms', 'core');"
-docker exec -i postgres psql -U admin -d gymapp -c "
-CREATE TABLE IF NOT EXISTS exercises (
-    id UUID PRIMARY KEY,
-    type exercise_type NOT NULL,
-    alias TEXT NOT NULL,
-    description TEXT NOT NULL
-);"
+echo "Running database migrations..."
+# We use the official migrate image to run the migrations against the postgres container.
+NETWORK_NAME=$(docker network ls --filter "name=${PWD##*/}" -q | head -n 1)
+docker run --rm \
+    -v $(pwd)/migrations:/migrations \
+    --network "$NETWORK_NAME" \
+    migrate/migrate \
+    -path=/migrations/ \
+    -database "postgres://postgres:postgres@postgres:5432/appweb?sslmode=disable" \
+    up
 
 echo "the architecture is ready"
